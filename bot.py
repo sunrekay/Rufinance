@@ -1,10 +1,10 @@
 import logging
-import inline_keyboard
 from aiogram import Bot, Dispatcher, executor, types
 
 import inline_keyboard
 from config import BOT_TOKEN
 import bot_messages
+import chart_manager
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=BOT_TOKEN)
@@ -20,11 +20,17 @@ MONEY_INPUT_INT: int
 ########################################################################
 ##                    Основная часть бота                             ##
 ########################################################################
+
+
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
-    reset_inputs()
-    await message.answer(text=bot_messages.start(),
-                         reply_markup=inline_keyboard.OKEY_LETS_GO)
+    # await bot.send_photo(chat_id=message.from_user.id,
+    #                      photo=chart_manager.get_pie_chart(message.chat.id))
+    await message.answer_photo(chart_manager.get_pie_chart(message.chat.id))
+    # Ветка с обучением
+    # reset_inputs()
+    # await message.answer(text=bot_messages.start(),
+    #                      reply_markup=inline_keyboard.OKEY_LETS_GO)
 
 
 @dp.callback_query_handler(text='lets')
