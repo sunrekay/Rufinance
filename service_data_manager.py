@@ -1,7 +1,7 @@
 import json
 
 
-def add_record(tg_id:int, last_message_id:str) -> dict:
+def add_record(tg_id: int, last_message_id:str) -> dict:
     with open("service_data.json", "r", encoding='utf-8') as f:
         try:
             data = json.loads(f.read())

@@ -37,6 +37,7 @@ TURN_CATEGORY_FOR_ADD = InlineKeyboardMarkup().add(BTN_PLUS, BTN_MINUS).add(BTN_
 
 BACK_TO_TRANSACTION_MENU = InlineKeyboardMarkup().add(BTN_BACK_TO_TRANSACTION_MENU)
 
+
 # Внести затраты меню
 def enter_minus_menu(enter_minus: str = 'Ввести сумму', choose_category: str = 'Выберите Категорию',
                      choose_sub_category: str = 'Выберите Подкатегорию'):
@@ -55,6 +56,8 @@ def get_category_list():
     return ['category_nutrion', 'category_credits', 'category_home', 'category_car', 'category_health',
             'category_clothes', 'category_public_transport', 'category_recreation_and_entertaiment',
             'category_education']
+
+
 def translate_key(key):
     keys = { 'category_nutrion': 'Питание',
              'category_credits': 'Кредиты',
@@ -66,6 +69,7 @@ def translate_key(key):
              'category_recreation_and_entertaiment': 'Отдых и развлечения',
              'category_education': 'Образование'}
     return keys[key]
+
 
 BTN_CATEGORY_NUTRION = InlineKeyboardButton('Питание', callback_data='category_nutrion')
 BTN_CATEGORY_CREDITS = InlineKeyboardButton('Кредиты', callback_data='category_credits')
@@ -84,35 +88,12 @@ CATEGORIES_MENU = InlineKeyboardMarkup().add(BTN_CATEGORY_NUTRION).add(BTN_CATEG
     .add(BTN_CATEGORY_CAR).add(BTN_CATEGORY_HEALTH).add(BTN_CATEGORY_CLOTHES).add(BTN_CATEGORY_PUBLIC_TRANSPORT)\
     .add(BTN_CATEGORY_RECREATION_AND_ENTERTAIMENT).add(BTN_CATEGORY_EDUCATION).add(BTN_BACK_TO_ENTER_DATA_MINUS_MENU)
 
+
 # Список ПодКатегорий
-def get_sub_category_list(category: str):
-    if category == 'Питание':
-        nutrion_callback_data_sub_category_list = ['products', 'food_at_work', 'school_breakfast', 'fastfood']
-        return nutrion_callback_data_sub_category_list
+def get_sub_category_list():
+    '''Дописать подкатегории других категорий'''
+    return ['products', 'food_at_work', 'school_breakfast', 'fastfood']
 
-    if category == 'Кредиты':
-        pass
-
-    if category == 'Дом':
-        pass
-
-    if category == 'Машина':
-        pass
-
-    if category == 'Здоровье':
-        pass
-
-    if category == 'Одежда':
-        pass
-
-    if category == 'Общественный транспорт':
-        pass
-
-    if category == 'Отдых и развлечения':
-        pass
-
-    if category == 'Образование':
-        pass
 
 def get_sub_category_BTNS(category: str):
     SUB_CATEGORIES_MENU = InlineKeyboardMarkup()
@@ -142,6 +123,7 @@ def get_sub_category_BTNS(category: str):
         pass
     if category == 'Образование':
         pass
+
 
 def translate_sub_key(sub_category: str):
     sub_category_dict = {

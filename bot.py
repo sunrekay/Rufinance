@@ -45,6 +45,7 @@ async def send_welcome(message: types.Message):
     # await message.answer(text=bot_messages.start(),
     #                      reply_markup=inline_keyboard.OKEY_LETS_GO)
 
+
 # ГЛАВНОЕ МЕНЮ
 @dp.callback_query_handler(text='menu')
 async def menu(callback_query: types.CallbackQuery):
@@ -99,6 +100,7 @@ async def plus_transaction_change(callback_query: types.CallbackQuery):
                                 reply_markup=inline_keyboard.BACK_TO_TRANSACTION_MENU)
     TRANSACTION_INPUT_PLUS_BOOL = True
 
+
 # Ветка ввода "Расход"
 @dp.callback_query_handler(text='minus_transaction_change')
 async def minus_transaction_change(callback_query: types.CallbackQuery):
@@ -134,6 +136,7 @@ async def choose_category(callback_query: types.CallbackQuery):
                                 text='Выберите Категорию:',
                                 reply_markup=inline_keyboard.CATEGORIES_MENU)
 
+
 @dp.callback_query_handler(text=inline_keyboard.get_category_list())
 async def category_list(callback_query: types.CallbackQuery):
     global TRANSACTION_INPUT_MINUS_CATEGORY
@@ -154,7 +157,7 @@ async def choose_sub_category(callback_query: types.CallbackQuery):
                                     reply_markup=inline_keyboard.get_sub_category_BTNS(TRANSACTION_INPUT_MINUS_CATEGORY))
 
 
-@dp.callback_query_handler(text=inline_keyboard.get_sub_category_list(TRANSACTION_INPUT_MINUS_CATEGORY))
+@dp.callback_query_handler(text=inline_keyboard.get_sub_category_list())
 async def sub_category_list(callback_query: types.CallbackQuery):
     global TRANSACTION_INPUT_MINUS_SUB_CATEGORY
     TRANSACTION_INPUT_MINUS_SUB_CATEGORY = inline_keyboard.translate_sub_key(callback_query.data)
@@ -177,7 +180,7 @@ async def save_minus_choose(callback_query: types.CallbackQuery):
                                                    name=f'{TRANSACTION_INPUT_MINUS_CATEGORY}({TRANSACTION_INPUT_MINUS_SUB_CATEGORY})',
                                                    cost=TRANSACTION_INPUT_MINUS_INT,
                                                    operation='Расход')
-        await transaction_change_menu(callback_query.from_user.id)
+        await transaction_change_menu(callback_query)
 
 
 ######################
