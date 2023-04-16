@@ -9,41 +9,61 @@ import data_manager
 BTN_OKEY_LETS_GO = InlineKeyboardButton('Поехали!', callback_data='lets')
 OKEY_LETS_GO = InlineKeyboardMarkup().add(BTN_OKEY_LETS_GO)
 
-BTN_CREATE_RULE = InlineKeyboardButton('Создать правило', callback_data='create_rule')
-CREATE_RULE = InlineKeyboardMarkup().add(BTN_CREATE_RULE)
+BTN_TRAINING_CREATE_RULE = InlineKeyboardButton('Создать правило', callback_data='create_rule')
+TRAINING_CREATE_RULE = InlineKeyboardMarkup().add(BTN_TRAINING_CREATE_RULE)
 
-BTN_NEXT_STEP = InlineKeyboardButton('Следующий шаг', callback_data='next_step')
-END_TRAINING = InlineKeyboardMarkup().add(BTN_CREATE_RULE, BTN_NEXT_STEP)
+BTN_TRAINING_CALENDAR = InlineKeyboardButton('Календарь обязательств', callback_data='create_training_calendar')
+TRAINING_CALENDAR = InlineKeyboardMarkup().add(BTN_TRAINING_CALENDAR)
+
+BTN_TRAINIG_CREATE_CALENDAR = InlineKeyboardButton('Создать обязательство', callback_data='create_commitment')
+TRAINING_CREATE_CALENDAR = InlineKeyboardMarkup().add(BTN_TRAINIG_CREATE_CALENDAR)
+
+BTN_TRAINING_TRANSACTION = InlineKeyboardButton('Пополнить баланс', callback_data='add_transaction')
+TRAINING_TRANSACTION = InlineKeyboardMarkup().add(BTN_TRAINING_TRANSACTION)
+
 ######
-BTN_START = InlineKeyboardButton('Начать!', callback_data='menu')
+BTN_START = InlineKeyboardButton('Начать!', callback_data='training_create_rule')
 START = InlineKeyboardMarkup().add(BTN_START)
 
 # Главное меню
-BTN_MY_RULES = InlineKeyboardButton('Мои правила', callback_data='my_rules')
-BTN_SLAVE_CALENDAR = InlineKeyboardButton('Календарь обязательств', callback_data='calendar_of_commitments')
-BTN_TRANSACTION_CHANGE = InlineKeyboardButton('Транзакционные изменения', callback_data='transaction_change')
+BTN_MY_RULES = InlineKeyboardButton('🎯Мои правила', callback_data='my_rules')
+BTN_SLAVE_CALENDAR = InlineKeyboardButton('🗓Календарь обязательств', callback_data='calendar_of_commitments')
+BTN_TRANSACTION_CHANGE = InlineKeyboardButton('💳Транзакционные изменения', callback_data='transaction_change')
 MENU = InlineKeyboardMarkup().add(BTN_MY_RULES).add(BTN_SLAVE_CALENDAR).add(BTN_TRANSACTION_CHANGE)
 
 
 ########################################################################################################################
 #                                        Меню "Транзакционные изменения"                                               #
 ########################################################################################################################
-BTN_ADD_TRASACTION = InlineKeyboardButton('Добавить транзакцию', callback_data='add_transaction')
-BTN_DELETE_TRANSACTION = InlineKeyboardButton('Удалить транзакцию', callback_data='delete_transaction')
-BTN_HISTORY_PLUS = InlineKeyboardButton('История "Доход"', callback_data='transaction_history_plus')
-BTN_HISTORY_MINUS = InlineKeyboardButton('История "Расход"', callback_data='transaction_history_minus')
-BTN_HISTORY_ALL = InlineKeyboardButton('История "Все"', callback_data='transaction_history_all')
+BTN_ADD_TRASACTION = InlineKeyboardButton('➕Добавить транзакцию', callback_data='add_transaction')
+BTN_DELETE_TRANSACTION = InlineKeyboardButton('➖Удалить транзакцию', callback_data='delete_transaction')
+BTN_HISTORY_ALL = InlineKeyboardButton('🗒Журнал Изменений', callback_data='transaction_history_all')
 BTN_BACK_TO_MENU = InlineKeyboardButton('Назад', callback_data='menu')
 TRANSACTION_CHANGE_MENU = InlineKeyboardMarkup().add(BTN_ADD_TRASACTION).add(BTN_DELETE_TRANSACTION)\
-    .add(BTN_HISTORY_PLUS).add(BTN_HISTORY_MINUS).add(BTN_HISTORY_ALL).add(BTN_BACK_TO_MENU)
+    .add(BTN_HISTORY_ALL).add(BTN_BACK_TO_MENU)
 
 
 BTN_PLUS = InlineKeyboardButton('Доход', callback_data='plus_transaction_change')
 BTN_MINUS = InlineKeyboardButton('Расход', callback_data='minus_transaction_change')
+CHOOSE_OPERATION = InlineKeyboardMarkup().add(BTN_PLUS).add(BTN_MINUS)\
+    .add(InlineKeyboardButton('❌', callback_data='add_transaction'))
+
+
+def get_list_callback_operations():
+    return ['plus_transaction_change', 'minus_transaction_change']
+
+
+def get_translate_list_callback_operation(data):
+    _dict = {
+        'plus_transaction_change': 'Доход',
+        'minus_transaction_change': 'Расход'
+    }
+    return _dict[data]
+
 BTN_BACK_TO_TRANSACTION_MENU = InlineKeyboardButton('❌', callback_data='transaction_change')
-TURN_CATEGORY_FOR_ADD = InlineKeyboardMarkup().add(BTN_PLUS, BTN_MINUS).add(BTN_BACK_TO_TRANSACTION_MENU)
 
 BACK_TO_TRANSACTION_MENU = InlineKeyboardMarkup().add(BTN_BACK_TO_TRANSACTION_MENU)
+
 
 
 def get_transaction_list(tg_id: str):
@@ -69,14 +89,14 @@ def get_index_transaction_delete():
     return _list
 
 
-def enter_minus_menu(enter_minus: str, choose_category: str, choose_sub_category: str):
+def enter_minus_menu(enter_minus: str, choose_category: str, choose_operation: str):
     BTN_ENRER_MINUS = InlineKeyboardButton(enter_minus, callback_data='enter_minus')
     BTN_CHOOSE_CATEGORY = InlineKeyboardButton(choose_category, callback_data='choose_category')
-    BTN_CHOOSE_SUB_CATEGORY = InlineKeyboardButton(choose_sub_category, callback_data='choose_sub_category')
+    BTN_CHOOSE_OPERATION = InlineKeyboardButton(choose_operation, callback_data='choose_operation')
     BTN_SAVE_MINUS_CHOOSE = InlineKeyboardButton('✅', callback_data='save_minus_choose')
 
-    ENTER_DATA_MINUS_MENU = InlineKeyboardMarkup().add(BTN_ENRER_MINUS).add(BTN_CHOOSE_CATEGORY).add(BTN_CHOOSE_SUB_CATEGORY)\
-        .add(BTN_BACK_TO_TRANSACTION_MENU, BTN_SAVE_MINUS_CHOOSE)
+    ENTER_DATA_MINUS_MENU = InlineKeyboardMarkup().add(BTN_ENRER_MINUS).add(BTN_CHOOSE_CATEGORY)\
+        .add(BTN_CHOOSE_OPERATION).add(BTN_BACK_TO_TRANSACTION_MENU, BTN_SAVE_MINUS_CHOOSE)
     return ENTER_DATA_MINUS_MENU
 
 
@@ -110,11 +130,9 @@ BTN_CATEGORY_PUBLIC_TRANSPORT = InlineKeyboardButton('Общественный �
 BTN_CATEGORY_RECREATION_AND_ENTERTAIMENT = InlineKeyboardButton('Отдых и развлечения',
                                                                 callback_data='category_recreation_and_entertaiment')
 BTN_CATEGORY_EDUCATION = InlineKeyboardButton('Образование', callback_data='category_education')
-BTN_BACK_TO_ENTER_DATA_MINUS_MENU = InlineKeyboardButton('Назад', callback_data='minus_transaction_change')
+BTN_BACK_TO_ENTER_DATA_MINUS_MENU = InlineKeyboardButton('❌', callback_data='minus_transaction_change')
 
-CATEGORIES_MENU = InlineKeyboardMarkup().add(BTN_CATEGORY_NUTRION).add(BTN_CATEGORY_CREDITS).add(BTN_CATEGORY_HOME)\
-    .add(BTN_CATEGORY_CAR).add(BTN_CATEGORY_HEALTH).add(BTN_CATEGORY_CLOTHES).add(BTN_CATEGORY_PUBLIC_TRANSPORT)\
-    .add(BTN_CATEGORY_RECREATION_AND_ENTERTAIMENT).add(BTN_CATEGORY_EDUCATION).add(BTN_BACK_TO_ENTER_DATA_MINUS_MENU)
+CATEGORIES_MENU = InlineKeyboardMarkup().add(BTN_BACK_TO_ENTER_DATA_MINUS_MENU)
 
 
 def get_sub_category_list():
@@ -319,40 +337,25 @@ def translate_sub_key(sub_category: str):
 ########################################################################################################################
 #                                        Меню "Мои Правила"                                                            #
 ########################################################################################################################
-BTN_CREATE_RULE = InlineKeyboardButton('Создать правило', callback_data='create_rule')
-BTN_DELETE_RULE = InlineKeyboardButton('Удалить правило', callback_data='delete_rule')
+BTN_CREATE_RULE = InlineKeyboardButton('📃Создать правило', callback_data='create_rule')
+BTN_DELETE_RULE = InlineKeyboardButton('🗑Удалить правило', callback_data='delete_rule')
 MY_RULE_MENU = InlineKeyboardMarkup().add(BTN_CREATE_RULE).add(BTN_DELETE_RULE).add(BTN_BACK_TO_MENU)
 
 
 def create_rule_menu(category: str, limitation: str):
     BTN_CHOOSE_CATEGORY_RULE = InlineKeyboardButton(category, callback_data='choose_category_rule')
     BTN_ENTER_LIMITATION_RULE = InlineKeyboardButton(limitation, callback_data='enter_limitation_rule')
-    BTN_SAVE_RULE = InlineKeyboardButton('Сохранить', callback_data='save_rule')
-    BTN_BACK_TO_RULE_MENU = InlineKeyboardButton('Назад', callback_data='my_rules')
+    BTN_SAVE_RULE = InlineKeyboardButton('✅', callback_data='save_rule')
+    BTN_BACK_TO_RULE_MENU = InlineKeyboardButton('❌', callback_data='my_rules')
     CREATE_RULE = InlineKeyboardMarkup().add(BTN_ENTER_LIMITATION_RULE).add(BTN_CHOOSE_CATEGORY_RULE) \
-        .add(BTN_SAVE_RULE).add(BTN_BACK_TO_RULE_MENU)
+        .add(BTN_BACK_TO_RULE_MENU, BTN_SAVE_RULE)
     return CREATE_RULE
 
 
-BTN_RULE_CATEGORY_NUTRION = InlineKeyboardButton('Питание', callback_data='rule_category_nutrion')
-BTN_RULE_CATEGORY_CREDITS = InlineKeyboardButton('Кредиты', callback_data='rule_category_credits')
-BTN_RULE_CATEGORY_HOME = InlineKeyboardButton('Дом', callback_data='rule_category_home')
-BTN_RULE_CATEGORY_CAR = InlineKeyboardButton('Машина', callback_data='rule_category_car')
-BTN_RULE_CATEGORY_HEALTH = InlineKeyboardButton('Здоровье', callback_data='rule_category_health')
-BTN_RULE_CATEGORY_CLOTHES = InlineKeyboardButton('Одежда', callback_data='rule_category_clothes')
-BTN_RULE_CATEGORY_PUBLIC_TRANSPORT = InlineKeyboardButton('Общественный транспорт',
-                                                     callback_data='rule_category_public_transport')
-BTN_RULE_CATEGORY_RECREATION_AND_ENTERTAIMENT = InlineKeyboardButton('Отдых и развлечения',
-                                                                callback_data='rule_category_recreation_and_entertaiment')
-BTN_RULE_CATEGORY_EDUCATION = InlineKeyboardButton('Образование', callback_data='rule_category_education')
-BTN_BACK_TO_RULE_MENU = InlineKeyboardButton('Назад', callback_data='create_rule')
+
+BTN_BACK_TO_RULE_MENU = InlineKeyboardButton('❌', callback_data='create_rule')
 
 BACK_TO_RULE_MENU = InlineKeyboardMarkup().add(BTN_BACK_TO_RULE_MENU)
-RULE_CATEGORIES_MENU = InlineKeyboardMarkup().add(BTN_RULE_CATEGORY_NUTRION)\
-    .add(BTN_RULE_CATEGORY_HOME).add(BTN_RULE_CATEGORY_CAR).add(BTN_RULE_CATEGORY_HEALTH)\
-    .add(BTN_RULE_CATEGORY_CLOTHES).add(BTN_RULE_CATEGORY_PUBLIC_TRANSPORT)\
-    .add(BTN_RULE_CATEGORY_RECREATION_AND_ENTERTAIMENT).add(BTN_RULE_CATEGORY_EDUCATION)\
-    .add(BTN_BACK_TO_RULE_MENU)
 
 
 def ger_list_of_btn_rule(tg_id: str):
@@ -396,8 +399,8 @@ def rule_translate_key(key):
 ########################################################################################################################
 #                                       Меню "Календарь обязательств"                                                  #
 ########################################################################################################################
-BTN_CREATE_COMMITMENT = InlineKeyboardButton('Создать обязательство', callback_data='create_commitment')
-BTN_DELETE_COMMITMENT = InlineKeyboardButton('Удалить обязательство', callback_data='delete_commitment')
+BTN_CREATE_COMMITMENT = InlineKeyboardButton('📄Создать обязательство', callback_data='create_commitment')
+BTN_DELETE_COMMITMENT = InlineKeyboardButton('🗑Удалить обязательство', callback_data='delete_commitment')
 CALENDAR_MENU = InlineKeyboardMarkup().add(BTN_CREATE_COMMITMENT).add(BTN_DELETE_COMMITMENT).add(BTN_BACK_TO_MENU)
 BTN_BACK_TO_CREATE_COMMITMENT_MENU = InlineKeyboardMarkup().add(InlineKeyboardButton('Назад',
                                                                                      callback_data='create_commitment'))
@@ -407,10 +410,10 @@ def create_commitment_menu(sum: str, name: str, date: str):
     BTN_ENTER_SUM_OF_COMMITMENT = InlineKeyboardButton(sum, callback_data='enter_sum_commitment')
     BTN_ENTER_NAME_OF_COMMITMENT = InlineKeyboardButton(name, callback_data='enter_name_of_commitment')
     BTN_ENTER_DATE_OF_COMMITMENT = InlineKeyboardButton(date, callback_data='enter_date_of_commitment')
-    BTN_SAVE_RULE = InlineKeyboardButton('Сохранить', callback_data='save_commitment')
-    BTN_BACK_TO_RULE_MENU = InlineKeyboardButton('Назад', callback_data='calendar_of_commitments')
+    BTN_SAVE_RULE = InlineKeyboardButton('✅', callback_data='save_commitment')
+    BTN_BACK_TO_RULE_MENU = InlineKeyboardButton('❌', callback_data='calendar_of_commitments')
     CREATE_RULE = InlineKeyboardMarkup().add(BTN_ENTER_SUM_OF_COMMITMENT).add(BTN_ENTER_NAME_OF_COMMITMENT)\
-        .add(BTN_ENTER_DATE_OF_COMMITMENT).add(BTN_SAVE_RULE).add(BTN_BACK_TO_RULE_MENU)
+        .add(BTN_ENTER_DATE_OF_COMMITMENT).add(BTN_BACK_TO_RULE_MENU, BTN_SAVE_RULE)
     return CREATE_RULE
 
 

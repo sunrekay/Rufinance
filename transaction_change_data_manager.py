@@ -173,9 +173,11 @@ def get_transactions_all(tg_id) -> str:
                 unifier += f'[{date_list[i]}][{operation_list[i]}] {name_list[i]} - {cost_list[i]} руб.\n'
             return unifier
 
+            if not unifier:
+                return 'Нет транзакций.'
         except:
             f.close()
-            return ''
+            return 'Нет транзакций.'
 
 
 def sum_of_(tg_id, operation):

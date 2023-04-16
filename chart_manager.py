@@ -75,7 +75,12 @@ def set_calendar_table(telegram_id):
         today = datetime.now()
         diff = fday - today
         diff = str(diff).split(',')
-        table_data.append(['-'.join(date[i]), name[i], f'{sum_[i]} ₽', f'{diff[0].replace("days", "")} дней'])
+        remains = sum_[i] - transaction_change_data_manager.category_sum_of_(tg_id=telegram_id,
+                                                                             operation="Расход",
+                                                                             category=name[i])
+        different = diff[0].replace("days", "")
+        different = different.replace("day", "")
+        table_data.append(['-'.join(date[i]), name[i], f'{remains} ₽', f'{different} дней'])
 
     fig, ax = plt.subplots()
     table = ax.table(cellText=table_data, loc='center', cellLoc='center',
