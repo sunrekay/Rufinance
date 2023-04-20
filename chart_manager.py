@@ -24,7 +24,7 @@ def set_pie_chart(telegram_id):
     plt.savefig(f'static/{telegram_id}_pie.png')
 
 
-def get_pie_chart(telegram_id):
+def get_pie_chart(telegram_id) -> InputFile:
     try:
         return InputFile(f'static/{telegram_id}_pie.png')
     except:

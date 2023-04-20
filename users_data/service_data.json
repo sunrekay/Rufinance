@@ -1,53 +1,42 @@
 {
- "1132664192": {
-  "last_message_id": 3752
- },
- "1424856401": {
-  "last_message_id": 3362
- },
- "1538486150": {
-  "last_message_id": 3602
- },
- "1766743716": {
-  "last_message_id": 3746
- },
- "1000157433": {
-  "last_message_id": 3429
+ "12345": {
+  "last_message_id": "228",
+  "RULE_INPUT_BOOL": false,
+  "RULE_INPUT_STR": "",
+  "RULE_INPUT_INT": 100,
+  "RULE_INPUT_STR_BOOL": "",
+  "TRANSACTION_INPUT_MINUS_BOOL": false,
+  "TRANSACTION_INPUT_CATEGORY_BOOL": false,
+  "TRANSACTION_INPUT_OPERATION_BOOL": false,
+  "TRANSACTION_INPUT_MINUS_INT": 0,
+  "TRANSACTION_INPUT_MINUS_CATEGORY": "",
+  "TRANSACTION_INPUT_OPERATION": "",
+  "COMMITMENT_SUM": 0,
+  "COMMITMENT_NAME": "",
+  "COMMITMENT_DATE": "",
+  "COMMITMENT_SUM_BOOL": false,
+  "COMMITMENT_NAME_BOOL": false,
+  "COMMITMENT_DATE_BOOL": false,
+  "TRAINIG_DICT_BOOL": true
  },
  "871345264": {
-  "last_message_id": 3473
- },
- "1929188381": {
-  "last_message_id": 3635
- },
- "5285775372": {
-  "last_message_id": 3475
- },
- "834781752": {
-  "last_message_id": 3486
- },
- "377572496": {
-  "last_message_id": 3611
- },
- "1017804570": {
-  "last_message_id": 3594
- },
- "940299357": {
-  "last_message_id": 3597
- },
- "993677632": {
-  "last_message_id": 3613
- },
- "1023239658": {
-  "last_message_id": 3679
- },
- "480643956": {
-  "last_message_id": 3729
- },
- "791855015": {
-  "last_message_id": 3720
- },
- "6092141224": {
-  "last_message_id": 3748
+  "last_message_id": 3953,
+  "RULE_INPUT_BOOL": false,
+  "RULE_INPUT_STR": "\u0412\u0432\u0435\u0441\u0442\u0438 \u043d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",
+  "RULE_INPUT_INT": "\u0412\u0432\u0435\u0441\u0442\u0438 \u0441\u0443\u043c\u043c\u0443",
+  "RULE_INPUT_STR_BOOL": "",
+  "TRANSACTION_INPUT_MINUS_BOOL": false,
+  "TRANSACTION_INPUT_CATEGORY_BOOL": false,
+  "TRANSACTION_INPUT_OPERATION_BOOL": false,
+  "TRANSACTION_INPUT_MINUS_INT": "\u0412\u0432\u0435\u0441\u0442\u0438 \u0441\u0443\u043c\u043c\u0443",
+  "TRANSACTION_INPUT_MINUS_CATEGORY": "\u0412\u0432\u0435\u0441\u0442\u0438 \u043d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",
+  "TRANSACTION_INPUT_OPERATION": "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u043e\u043f\u0435\u0440\u0430\u0446\u0438\u044e",
+  "COMMITMENT_SUM": "\u0412\u0432\u0435\u0441\u0442\u0438 \u0441\u0443\u043c\u043c\u0443",
+  "COMMITMENT_NAME": "\u0412\u0432\u0435\u0441\u0442\u0438 \u043d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",
+  "COMMITMENT_DATE": "\u0412\u0432\u0435\u0441\u0442\u0438 \u0434\u0430\u0442\u0443",
+  "COMMITMENT_SUM_BOOL": false,
+  "COMMITMENT_NAME_BOOL": false,
+  "COMMITMENT_DATE_BOOL": false,
+  "TRAINIG_DICT_BOOL": false
  }
 }

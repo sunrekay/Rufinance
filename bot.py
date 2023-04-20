@@ -18,40 +18,11 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
 
-# Переменные для понимания какие данные вводит пользователь
-RULE_INPUT_BOOL: dict = {}
-RULE_INPUT_STR: dict = {}
-RULE_INPUT_INT: dict = {}
-RULE_INPUT_STR_BOOL: dict = {}
-
-
-TRANSACTION_INPUT_MINUS_BOOL: dict = {}
-TRANSACTION_INPUT_CATEGORY_BOOL: dict = {}
-TRANSACTION_INPUT_OPERATION_BOOL: dict = {}
-
-TRANSACTION_INPUT_MINUS_INT: dict = {}
-TRANSACTION_INPUT_MINUS_CATEGORY: dict = {}
-TRANSACTION_INPUT_OPERATION: dict = {}
-
-
-COMMITMENT_SUM: dict = {}
-COMMITMENT_NAME: dict = {}
-COMMITMENT_DATE: dict = {}
-
-COMMITMENT_SUM_BOOL: dict = {}
-COMMITMENT_NAME_BOOL: dict = {}
-COMMITMENT_DATE_BOOL: dict = {}
-
-TRAINIG_DICT_BOOL: dict = {}
-########################################################################
-##                    Основная часть бота                             ##
-########################################################################
-
 
 ######################################## Ветка обучения ################################################################
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
-    reset_minus_menu_data(message.chat.id)
+    service_data_manager.update(message.chat.id)
     last_message = await bot.send_message(message.chat.id,
                                           text=bot_messages.start(),
                                           reply_markup=inline_keyboard.START)
@@ -60,12 +31,13 @@ async def send_welcome(message: types.Message):
 
 @dp.callback_query_handler(text='training_create_rule')
 async def training_create_rule(callback_query: types.CallbackQuery):
-    global TRAINIG_DICT_BOOL
     await bot.edit_message_text(chat_id=callback_query.from_user.id,
                                 message_id=service_data_manager.get_last_message_id(callback_query.from_user.id),
                                 text=bot_messages.create_rule(),
                                 reply_markup=inline_keyboard.TRAINING_CREATE_RULE)
-    TRAINIG_DICT_BOOL[callback_query.from_user.id] = True
+    service_data_manager.set(tg_id=callback_query.from_user.id,
+                             key="TRAINIG_DICT_BOOL",
+                             value=True)
 
 
 @dp.callback_query_handler(text='training_calendar')
@@ -94,9 +66,9 @@ async def training_create_transaction(callback_query: types.CallbackQuery):
 
 @dp.callback_query_handler(text='create_training_transaction')
 async def training_transaction(callback_query: types.CallbackQuery):
-    reset_minus_menu_data(callback_query.from_user.id)
     await bot.send_message(chat_id=callback_query.from_user.id,
                            text=bot_messages.create_transaction())
+    service_data_manager.set(tg_id=callback_query.from_user.id, key='TRAINIG_DICT_BOOL', value=False)
     time.sleep(5)
     await menu(callback_query)
 ########################################################################################################################
@@ -105,9 +77,9 @@ async def training_transaction(callback_query: types.CallbackQuery):
 # ГЛАВНОЕ МЕНЮ
 @dp.callback_query_handler(text='menu')
 async def menu(callback_query: types.CallbackQuery):
-    reset_minus_menu_data(callback_query.from_user.id)
     await bot.delete_message(chat_id=callback_query.from_user.id,
                              message_id=service_data_manager.get_last_message_id(callback_query.from_user.id))
+    service_data_manager.update(callback_query.from_user.id)
 
     sum_of_plus = transaction_change_data_manager.sum_of_(tg_id=callback_query.from_user.id,
                                                           operation="Доход")
@@ -131,14 +103,9 @@ async def menu(callback_query: types.CallbackQuery):
 ########################################################################################################################
 @dp.callback_query_handler(text='calendar_of_commitments')
 async def calendar_of_commitments_menu(callback_query: types.CallbackQuery):
-    global COMMITMENT_SUM
-    global COMMITMENT_NAME
-    global COMMITMENT_DATE
-    COMMITMENT_SUM[callback_query.from_user.id] = 'Ввести сумму'
-    COMMITMENT_NAME[callback_query.from_user.id] = 'Ввести название'
-    COMMITMENT_DATE[callback_query.from_user.id] = 'Ввести дату'
     await bot.delete_message(chat_id=callback_query.from_user.id,
                              message_id=service_data_manager.get_last_message_id(callback_query.from_user.id))
+    service_data_manager.update(callback_query.from_user.id)
 
     sum_of_plus = transaction_change_data_manager.sum_of_(tg_id=callback_query.from_user.id,
                                                           operation="Доход")
@@ -159,79 +126,72 @@ async def calendar_of_commitments_menu(callback_query: types.CallbackQuery):
 
 @dp.callback_query_handler(text='create_commitment')
 async def create_commitment(callback_query: types.CallbackQuery):
-    global COMMITMENT_SUM
-    global COMMITMENT_NAME
-    global COMMITMENT_DATE
-    global COMMITMENT_SUM_BOOL
-    global COMMITMENT_NAME_BOOL
-    global COMMITMENT_DATE_BOOL
-    COMMITMENT_SUM_BOOL[callback_query.from_user.id] = False
-    COMMITMENT_NAME_BOOL[callback_query.from_user.id] = False
-    COMMITMENT_DATE_BOOL[callback_query.from_user.id] = False
     await bot.delete_message(chat_id=callback_query.from_user.id,
                              message_id=service_data_manager.get_last_message_id(callback_query.from_user.id))
 
+    commitment_sum = service_data_manager.get(tg_id=callback_query.from_user.id, key="COMMITMENT_SUM")
+    commitment_name = service_data_manager.get(tg_id=callback_query.from_user.id, key="COMMITMENT_NAME")
+    commitment_date = service_data_manager.get(tg_id=callback_query.from_user.id, key="COMMITMENT_DATE")
+
     last_message = await bot.send_message(chat_id=callback_query.from_user.id,
                                           text='Создание обязательства:',
-                                          reply_markup=inline_keyboard.create_commitment_menu(f'{COMMITMENT_SUM[callback_query.from_user.id]} (₽)',
-                                                                                              COMMITMENT_NAME[callback_query.from_user.id],
-                                                                                              COMMITMENT_DATE[callback_query.from_user.id]))
+                                          reply_markup=inline_keyboard.create_commitment_menu(f'{commitment_sum} (₽)',
+                                                                                              commitment_name,
+                                                                                              commitment_date))
     service_data_manager.add_record(callback_query.from_user.id, last_message.message_id)
 
 
 @dp.callback_query_handler(text='enter_sum_commitment')
 async def enter_sum_commitment(callback_query: types.CallbackQuery):
-    global COMMITMENT_SUM_BOOL
     await bot.edit_message_text(chat_id=callback_query.from_user.id,
                                 message_id=service_data_manager.get_last_message_id(callback_query.from_user.id),
                                 text='Введите cумму (₽):',
                                 reply_markup=inline_keyboard.BTN_BACK_TO_CREATE_COMMITMENT_MENU)
-    COMMITMENT_SUM_BOOL[callback_query.from_user.id] = True
+    service_data_manager.set(tg_id=callback_query.from_user.id, key='COMMITMENT_SUM_BOOL', value=True)
 
 
 @dp.callback_query_handler(text='enter_name_of_commitment')
 async def enter_name_commitment(callback_query: types.CallbackQuery):
-    global COMMITMENT_NAME_BOOL
     await bot.edit_message_text(chat_id=callback_query.from_user.id,
                                 message_id=service_data_manager.get_last_message_id(callback_query.from_user.id),
                                 text='Введите название:',
                                 reply_markup=inline_keyboard.BTN_BACK_TO_CREATE_COMMITMENT_MENU)
-    COMMITMENT_NAME_BOOL[callback_query.from_user.id] = True
+    service_data_manager.set(tg_id=callback_query.from_user.id, key='COMMITMENT_NAME_BOOL', value=True)
 
 
 @dp.callback_query_handler(text='enter_date_of_commitment')
 async def enter_date_commitment(callback_query: types.CallbackQuery):
-    global COMMITMENT_DATE_BOOL
     await bot.edit_message_text(chat_id=callback_query.from_user.id,
                                 message_id=service_data_manager.get_last_message_id(callback_query.from_user.id),
                                 text='Введите дату, формата "дд-мм-гггг":',
                                 reply_markup=inline_keyboard.BTN_BACK_TO_CREATE_COMMITMENT_MENU)
-    COMMITMENT_DATE_BOOL[callback_query.from_user.id] = True
+    service_data_manager.set(tg_id=callback_query.from_user.id, key='COMMITMENT_DATE_BOOL', value=True)
 
 
 @dp.callback_query_handler(text='save_commitment')
 async def enter_date_commitment(callback_query: types.CallbackQuery):
-    global COMMITMENT_SUM
-    global COMMITMENT_NAME
-    global COMMITMENT_DATE
-    global TRAINIG_DICT_BOOL
+    commitment_sum = service_data_manager.get(tg_id=callback_query.from_user.id, key="COMMITMENT_SUM")
+    commitment_name = service_data_manager.get(tg_id=callback_query.from_user.id, key="COMMITMENT_NAME")
+    commitment_date = service_data_manager.get(tg_id=callback_query.from_user.id, key="COMMITMENT_DATE")
+    trainig_dict_bool = service_data_manager.get(tg_id=callback_query.from_user.id, key="TRAINIG_DICT_BOOL")
 
-    if COMMITMENT_SUM[callback_query.from_user.id] != 'Ввести сумму' and \
-        COMMITMENT_NAME[callback_query.from_user.id] != 'Ввести название' and \
-        COMMITMENT_DATE[callback_query.from_user.id] != 'Ввести дату':
+    if commitment_sum != 'Ввести сумму'\
+        and commitment_name != 'Ввести название'\
+        and commitment_date != 'Ввести дату':
         data_manager.add_record(callback_query.from_user.id,
-                                cost=COMMITMENT_SUM[callback_query.from_user.id],
-                                rule=COMMITMENT_NAME[callback_query.from_user.id],
-                                date=COMMITMENT_DATE[callback_query.from_user.id])
+                                cost=commitment_sum,
+                                rule=commitment_name,
+                                date=commitment_date)
         chart_manager.set_calendar_table(callback_query.from_user.id)
         chart_manager.set_pie_chart(callback_query.from_user.id)
-        if TRAINIG_DICT_BOOL[callback_query.from_user.id]:
+        if trainig_dict_bool:
             await training_create_transaction(callback_query)
         else:
             await calendar_of_commitments_menu(callback_query)
     else:
         await bot.send_message(callback_query.from_user.id, text='Заполните пожалуйста все поля')
         await create_commitment(callback_query.from_user.id)
+
 
 @dp.callback_query_handler(text='delete_commitment')
 async def delete_commitment(callback_query: types.CallbackQuery):
@@ -260,9 +220,9 @@ async def delete_commitment(callback_query: types.CallbackQuery):
 ########################################################################################################################
 @dp.callback_query_handler(text='my_rules')
 async def my_rule_menu(callback_query: types.CallbackQuery):
-    reset_minus_menu_data(callback_query.from_user.id)
     await bot.delete_message(chat_id=callback_query.from_user.id,
                              message_id=service_data_manager.get_last_message_id(callback_query.from_user.id))
+    service_data_manager.update(callback_query.from_user.id)
 
     last_message = await bot.send_photo(chat_id=callback_query.from_user.id,
                                         photo=chart_manager.get_my_rules_table(callback_query.from_user.id),
@@ -272,65 +232,67 @@ async def my_rule_menu(callback_query: types.CallbackQuery):
 
 @dp.callback_query_handler(text='create_rule')
 async def create_menu(callback_query: types.CallbackQuery):
-    global RULE_INPUT_INT
-    global RULE_INPUT_STR
+    rule_input_int = service_data_manager.get(tg_id=callback_query.from_user.id, key='RULE_INPUT_INT')
+    rule_input_str = service_data_manager.get(tg_id=callback_query.from_user.id, key='RULE_INPUT_STR')
+
     await bot.delete_message(chat_id=callback_query.from_user.id,
                              message_id=service_data_manager.get_last_message_id(callback_query.from_user.id))
 
     last_message = await bot.send_message(chat_id=callback_query.from_user.id,
                                           text='Создание правила:',
                                           reply_markup=inline_keyboard.create_rule_menu(
-                                              category=RULE_INPUT_STR[callback_query.from_user.id],
-                                              limitation=f'{RULE_INPUT_INT[callback_query.from_user.id]} (₽)')
+                                              category=rule_input_str,
+                                              limitation=f'{rule_input_int} (₽)')
                                           )
     service_data_manager.add_record(callback_query.from_user.id, last_message.message_id)
 
 
 @dp.callback_query_handler(text='choose_category_rule')
 async def choose_category_rule(callback_query: types.CallbackQuery):
-    global RULE_INPUT_STR_BOOL
     await bot.edit_message_text(chat_id=callback_query.from_user.id,
                                 message_id=service_data_manager.get_last_message_id(callback_query.from_user.id),
                                 text='Введите название:',
                                 reply_markup=inline_keyboard.BACK_TO_RULE_MENU
                                 )
-    RULE_INPUT_STR_BOOL[callback_query.from_user.id] = True
+    service_data_manager.set(tg_id=callback_query.from_user.id, key='RULE_INPUT_STR_BOOL', value=True)
 
 
 @dp.callback_query_handler(text=inline_keyboard.get_rule_category_list())
 async def choose_category_rule(callback_query: types.CallbackQuery):
-    global TRANSACTION_INPUT_MINUS_CATEGORY
-    TRANSACTION_INPUT_MINUS_CATEGORY[callback_query.from_user.id] = inline_keyboard.rule_translate_key(callback_query.data)
+    service_data_manager.set(tg_id=callback_query.from_user.id,
+                             key='TRANSACTION_INPUT_MINUS_CATEGORY',
+                             value=inline_keyboard.rule_translate_key(callback_query.data))
     await create_menu(callback_query)
 
 
 @dp.callback_query_handler(text='enter_limitation_rule')
 async def choose_category_rule(callback_query: types.CallbackQuery):
-    global RULE_INPUT_BOOL
     await bot.edit_message_text(chat_id=callback_query.from_user.id,
                                 message_id=service_data_manager.get_last_message_id(callback_query.from_user.id),
                                 text='Введите ограничение (₽):',
                                 reply_markup=inline_keyboard.BACK_TO_RULE_MENU
                                 )
-    RULE_INPUT_BOOL[callback_query.from_user.id] = True
+    service_data_manager.set(tg_id=callback_query.from_user.id, key='RULE_INPUT_BOOL', value=True)
 
 
 @dp.callback_query_handler(text='save_rule')
 async def save_rule(callback_query: types.CallbackQuery):
-    global RULE_INPUT_INT
-    global RULE_INPUT_STR
-    if RULE_INPUT_INT[callback_query.from_user.id] != "Ввести сумму" and\
-            RULE_INPUT_STR[callback_query.from_user.id] != "Ввести название":
+    rule_input_int = service_data_manager.get(tg_id=callback_query.from_user.id, key='RULE_INPUT_INT')
+    rule_input_str = service_data_manager.get(tg_id=callback_query.from_user.id, key='RULE_INPUT_STR')
+    training_dict_bool = service_data_manager.get(tg_id=callback_query.from_user.id, key='TRAINIG_DICT_BOOL')
+
+    if rule_input_int != "Ввести сумму" and\
+            rule_input_str != "Ввести название":
         my_rules_manager.add_record(tg_id=callback_query.from_user.id,
-                                    category=RULE_INPUT_STR[callback_query.from_user.id],
-                                    cost=RULE_INPUT_INT[callback_query.from_user.id])
+                                    category=rule_input_str,
+                                    cost=rule_input_int)
         chart_manager.set_my_rules_table(telegram_id=callback_query.from_user.id)
-        if TRAINIG_DICT_BOOL[callback_query.from_user.id]:
+        if training_dict_bool:
             await training_calendar(callback_query)
         else:
             await my_rule_menu(callback_query)
     else:
-        bot.send_message(callback_query.from_user.id, text='Заполните пожалуйста все поля')
+        await bot.send_message(callback_query.from_user.id, text='Заполните пожалуйста все поля')
         await create_menu(callback_query)
 
 
@@ -360,8 +322,6 @@ async def delete_list(callback_query: types.CallbackQuery):
 ########################################################################################################################
 @dp.callback_query_handler(text='transaction_change')
 async def transaction_change_menu(callback_query: types.CallbackQuery):
-    reset_minus_menu_data(callback_query.from_user.id)
-
     await bot.delete_message(chat_id=callback_query.from_user.id,
                              message_id=service_data_manager.get_last_message_id(callback_query.from_user.id))
     sum_of_plus = transaction_change_data_manager.sum_of_(tg_id=callback_query.from_user.id,
@@ -379,39 +339,41 @@ async def transaction_change_menu(callback_query: types.CallbackQuery):
 
 @dp.callback_query_handler(text='add_transaction')
 async def transaction_change_add_transaction(callback_query: types.CallbackQuery):
-    global TRANSACTION_INPUT_MINUS_INT
-    global TRANSACTION_INPUT_MINUS_CATEGORY
-    global TRANSACTION_INPUT_OPERATION
+    transaction_input_minus_int = service_data_manager.get(tg_id=callback_query.from_user.id,
+                                                           key='TRANSACTION_INPUT_MINUS_INT')
+    transaction_input_minus_category = service_data_manager.get(tg_id=callback_query.from_user.id,
+                                                                key='TRANSACTION_INPUT_MINUS_CATEGORY')
+    transaction_input_operation = service_data_manager.get(tg_id=callback_query.from_user.id,
+                                                           key='TRANSACTION_INPUT_OPERATION')
+
     await bot.delete_message(callback_query.from_user.id,
                              service_data_manager.get_last_message_id(callback_query.from_user.id))
     last_message = await bot.send_message(chat_id=callback_query.from_user.id,
                                           text='Заполните поля:',
                                           reply_markup=inline_keyboard.enter_minus_menu(
-                                              f'{TRANSACTION_INPUT_MINUS_INT[callback_query.from_user.id]} (₽)',
-                                              TRANSACTION_INPUT_MINUS_CATEGORY[callback_query.from_user.id],
-                                              TRANSACTION_INPUT_OPERATION[callback_query.from_user.id])
+                                              f'{transaction_input_minus_int} (₽)',
+                                              transaction_input_minus_category,
+                                              transaction_input_operation)
                                           )
     service_data_manager.add_record(callback_query.from_user.id, last_message.message_id)
 
 
 @dp.callback_query_handler(text='enter_minus')
 async def enter_minus(callback_query: types.CallbackQuery):
-    global TRANSACTION_INPUT_MINUS_BOOL
     await bot.edit_message_text(chat_id=callback_query.from_user.id,
                                 message_id=service_data_manager.get_last_message_id(callback_query.from_user.id),
                                 text='Введите число:',
                                 reply_markup=inline_keyboard.BACK_TO_TRANSACTION_MENU)
-    TRANSACTION_INPUT_MINUS_BOOL[callback_query.from_user.id] = True
+    service_data_manager.set(tg_id=callback_query.from_user.id, key='TRANSACTION_INPUT_MINUS_BOOL', value=True)
 
 
 @dp.callback_query_handler(text='choose_category')
 async def choose_category(callback_query: types.CallbackQuery):
-    global TRANSACTION_INPUT_CATEGORY_BOOL
     await bot.edit_message_text(chat_id=callback_query.from_user.id,
                                 message_id=service_data_manager.get_last_message_id(callback_query.from_user.id),
                                 text='Введите название:',
                                 reply_markup=inline_keyboard.CATEGORIES_MENU)
-    TRANSACTION_INPUT_CATEGORY_BOOL[callback_query.from_user.id] = True
+    service_data_manager.set(tg_id=callback_query.from_user.id, key='TRANSACTION_INPUT_CATEGORY_BOOL', value=True)
 
 
 @dp.callback_query_handler(text='choose_operation')
@@ -424,33 +386,36 @@ async def choose_category(callback_query: types.CallbackQuery):
 
 @dp.callback_query_handler(text=inline_keyboard.get_list_callback_operations())
 async def choose_category(callback_query: types.CallbackQuery):
-    global TRANSACTION_INPUT_OPERATION
     operation = inline_keyboard.get_translate_list_callback_operation(callback_query.data)
-    TRANSACTION_INPUT_OPERATION[callback_query.from_user.id] = operation
+    service_data_manager.set(tg_id=callback_query.from_user.id, key='TRANSACTION_INPUT_OPERATION', value=operation)
     await transaction_change_add_transaction(callback_query)
 
 
 @dp.callback_query_handler(text='save_minus_choose')
 async def save_minus_choose(callback_query: types.CallbackQuery):
-    global TRANSACTION_INPUT_MINUS_INT
-    global TRANSACTION_INPUT_MINUS_CATEGORY
-    global TRANSACTION_INPUT_OPERATION
-    global TRAINIG_DICT_BOOL
+    transaction_input_minus_int = service_data_manager.get(tg_id=callback_query.from_user.id,
+                                                           key='TRANSACTION_INPUT_MINUS_INT')
+    transaction_input_minus_category = service_data_manager.get(tg_id=callback_query.from_user.id,
+                                                                key='TRANSACTION_INPUT_MINUS_CATEGORY')
+    transaction_input_operation = service_data_manager.get(tg_id=callback_query.from_user.id,
+                                                           key='TRANSACTION_INPUT_OPERATION')
+    training_dict_bool = service_data_manager.get(tg_id=callback_query.from_user.id,
+                                                  key='TRAINIG_DICT_BOOL')
 
-    if TRANSACTION_INPUT_MINUS_INT[callback_query.from_user.id] == 'Ввести сумму'\
-        or TRANSACTION_INPUT_MINUS_CATEGORY[callback_query.from_user.id] == 'Ввести название'\
-        or TRANSACTION_INPUT_OPERATION[callback_query.from_user.id] == 'Выберите операцию':
+    if transaction_input_minus_int == 'Ввести сумму'\
+        or transaction_input_minus_category == 'Ввести название'\
+        or transaction_input_operation == 'Выберите операцию':
         await bot.send_message(chat_id=callback_query.from_user.id,
                                text='Заполните пожалуйста все поля')
     else:
         transaction_change_data_manager.add_record(tg_id=callback_query.from_user.id,
-                                                   name=TRANSACTION_INPUT_MINUS_CATEGORY[callback_query.from_user.id],
-                                                   cost=TRANSACTION_INPUT_MINUS_INT[callback_query.from_user.id],
-                                                   operation=TRANSACTION_INPUT_OPERATION[callback_query.from_user.id])
+                                                   name=transaction_input_minus_category,
+                                                   cost=transaction_input_minus_int,
+                                                   operation=transaction_input_operation)
         chart_manager.set_my_rules_table(telegram_id=callback_query.from_user.id)
         chart_manager.set_calendar_table(telegram_id=callback_query.from_user.id)
         chart_manager.set_pie_chart(telegram_id=callback_query.from_user.id)
-        if TRAINIG_DICT_BOOL[callback_query.from_user.id]:
+        if training_dict_bool:
             await training_transaction(callback_query)
         else:
             await transaction_change_menu(callback_query)
@@ -486,108 +451,69 @@ async def delete_transaction(callback_query: types.CallbackQuery):
 
 @dp.message_handler(content_types='text')
 async def input_data(message: types.Message):
-    global RULE_INPUT_STR_BOOL
-    global RULE_INPUT_STR
-    global RULE_INPUT_BOOL
-    global RULE_INPUT_INT
+    rule_input_str_bool = service_data_manager.get(tg_id=message.chat.id, key='RULE_INPUT_STR_BOOL')
+    rule_input_bool = service_data_manager.get(tg_id=message.chat.id, key='RULE_INPUT_BOOL')
 
-    global TRANSACTION_INPUT_MINUS_BOOL
-    global TRANSACTION_INPUT_MINUS_INT
-    global TRANSACTION_INPUT_CATEGORY_BOOL
-    global TRANSACTION_INPUT_MINUS_CATEGORY
+    transaction_input_minus_bool = service_data_manager.get(tg_id=message.chat.id, key='TRANSACTION_INPUT_MINUS_BOOL')
+    transaction_input_category_bool = service_data_manager.get(tg_id=message.chat.id, key='TRANSACTION_INPUT_CATEGORY_BOOL')
 
-    global COMMITMENT_SUM
-    global COMMITMENT_NAME
-    global COMMITMENT_DATE
+    commitment_sum_bool = service_data_manager.get(tg_id=message.chat.id, key='COMMITMENT_SUM_BOOL')
+    commitment_name_bool = service_data_manager.get(tg_id=message.chat.id, key='COMMITMENT_NAME_BOOL')
+    commitment_date_bool = service_data_manager.get(tg_id=message.chat.id, key='COMMITMENT_DATE_BOOL')
 
-    if RULE_INPUT_BOOL[message.chat.id]:
-        RULE_INPUT_INT[message.chat.id] = message.text
-        RULE_INPUT_BOOL[message.chat.id] = False
+    if rule_input_bool:
+        service_data_manager.set(tg_id=message.chat.id, key='RULE_INPUT_INT', value=message.text)
+        service_data_manager.set(tg_id=message.chat.id, key='RULE_INPUT_BOOL', value=False)
         await create_menu(message)
 
-    elif RULE_INPUT_STR_BOOL[message.chat.id]:
-        RULE_INPUT_STR[message.chat.id] = message.text
-        RULE_INPUT_STR_BOOL[message.chat.id] = False
+    elif rule_input_str_bool:
+        service_data_manager.set(tg_id=message.chat.id, key='RULE_INPUT_STR', value=message.text)
+        service_data_manager.set(tg_id=message.chat.id, key='RULE_INPUT_STR_BOOL', value=False)
         await create_menu(message)
 
-    elif TRANSACTION_INPUT_MINUS_BOOL[message.chat.id]:
+    elif transaction_input_minus_bool:
         try:
             data = message.text
-            TRANSACTION_INPUT_MINUS_INT[message.chat.id] = int(data)
-            TRANSACTION_INPUT_MINUS_BOOL[message.chat.id] = False
+            service_data_manager.set(tg_id=message.chat.id, key='TRANSACTION_INPUT_MINUS_INT', value=int(data))
+            service_data_manager.set(tg_id=message.chat.id, key='TRANSACTION_INPUT_MINUS_BOOL', value=False)
             await transaction_change_add_transaction(message)
         except:
             await message.answer(text='Введите пожалуйста так, как указано в примере.')
 
-    elif TRANSACTION_INPUT_CATEGORY_BOOL[message.chat.id]:
+    elif transaction_input_category_bool:
         data = message.text
-        TRANSACTION_INPUT_MINUS_CATEGORY[message.chat.id] = data
-        TRANSACTION_INPUT_CATEGORY_BOOL[message.chat.id] = False
+        service_data_manager.set(tg_id=message.chat.id, key='TRANSACTION_INPUT_MINUS_CATEGORY', value=data)
+        service_data_manager.set(tg_id=message.chat.id, key='TRANSACTION_INPUT_CATEGORY_BOOL', value=False)
         await transaction_change_add_transaction(message)
 
-    elif COMMITMENT_SUM_BOOL[message.chat.id]:
+    elif commitment_sum_bool:
         try:
             data = message.text
-            COMMITMENT_SUM[message.chat.id] = int(data)
-            COMMITMENT_SUM_BOOL[message.chat.id] = False
+            service_data_manager.set(tg_id=message.chat.id, key='COMMITMENT_SUM', value=int(data))
+            service_data_manager.set(tg_id=message.chat.id, key='COMMITMENT_SUM_BOOL', value=False)
             await create_commitment(message)
         except:
             await message.answer(text='Введите пожалуйсто число')
 
-    elif COMMITMENT_NAME_BOOL[message.chat.id]:
+    elif commitment_name_bool:
         data = message.text
-        COMMITMENT_NAME[message.chat.id] = data
-        COMMITMENT_NAME_BOOL[message.chat.id] = False
+        service_data_manager.set(tg_id=message.chat.id, key='COMMITMENT_NAME', value=data)
+        service_data_manager.set(tg_id=message.chat.id, key='COMMITMENT_NAME_BOOL', value=False)
         await create_commitment(message)
 
-    elif COMMITMENT_DATE_BOOL[message.chat.id]:
+    elif commitment_date_bool:
             try:
                 data = message.text
                 date = data.split('-')
                 if (0 < int(date[0]) <= 31) and (0 < int(date[1]) <= 12) and (2023 <= int(date[2]) <= 2300):
-                    COMMITMENT_DATE[message.chat.id] = data
-                    COMMITMENT_DATE_BOOL[message.chat.id] = False
+                    service_data_manager.set(tg_id=message.chat.id, key='COMMITMENT_DATE', value=data)
+                    service_data_manager.set(tg_id=message.chat.id, key='COMMITMENT_DATE_BOOL', value=False)
                     await create_commitment(message)
             except:
                 await message.answer(text='Введите пожалуйста так, как указано в примере')
 
     else:
         await message.answer(text='Я не понимаю.')
-
-
-########################################################################
-##                   Вспомогательные функции                          ##
-########################################################################
-def reset_minus_menu_data(user_id):
-    global TRANSACTION_INPUT_MINUS_INT
-    global TRANSACTION_INPUT_MINUS_CATEGORY
-    global TRANSACTION_INPUT_OPERATION
-    global RULE_INPUT_INT
-    global RULE_INPUT_STR
-    global TRAINIG_DICT_BOOL
-    global COMMITMENT_SUM
-    global COMMITMENT_NAME
-    global COMMITMENT_DATE
-    global COMMITMENT_SUM_BOOL
-    global COMMITMENT_NAME_BOOL
-    global COMMITMENT_DATE_BOOL
-    COMMITMENT_SUM[user_id] = 'Ввести сумму'
-    COMMITMENT_NAME[user_id] = 'Ввести название'
-    COMMITMENT_DATE[user_id] = 'Ввести дату'
-    RULE_INPUT_INT[user_id] = 'Ввести сумму'
-    RULE_INPUT_STR[user_id] = 'Ввести название'
-    TRANSACTION_INPUT_MINUS_INT[user_id] = 'Ввести сумму'
-    TRANSACTION_INPUT_MINUS_CATEGORY[user_id] = 'Ввести название'
-    TRANSACTION_INPUT_OPERATION[user_id] = 'Выберите операцию'
-    RULE_INPUT_BOOL[user_id] = False
-    RULE_INPUT_STR_BOOL[user_id] = False
-    TRANSACTION_INPUT_MINUS_BOOL[user_id] = False
-    TRANSACTION_INPUT_CATEGORY_BOOL[user_id] = False
-    TRANSACTION_INPUT_OPERATION_BOOL[user_id] = False
-    COMMITMENT_SUM_BOOL[user_id] = False
-    COMMITMENT_NAME_BOOL[user_id] = False
-    COMMITMENT_DATE_BOOL[user_id] = False
-    TRAINIG_DICT_BOOL[user_id] = False
 
 
 if __name__ == '__main__':
