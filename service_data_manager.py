@@ -1,6 +1,42 @@
 import json
 
 
+def add_new_account(tg_id):
+    with open("users_data/statistiek.json", "r", encoding='utf-8') as f:
+        try:
+            data = json.loads(f.read())
+        except:
+            data = {}
+    f.close()
+    tg_id = str(tg_id)
+    users = {
+        tg_id: {
+            'click_counter': 0,
+            'everything': 0
+        }
+    }
+    data.update(users)
+    users_json = json.dumps(data, indent=1)
+    with open("users_data/statistiek.json", "w", encoding='utf-8') as my_file:
+        my_file.write(users_json)
+    my_file.close()
+
+
+def click_counter_plus_one(tg_id):
+    with open("users_data/statistiek.json", "r", encoding='utf-8') as f:
+        try:
+            data = json.loads(f.read())
+        except:
+            data = {}
+    f.close()
+    tg_id = str(tg_id)
+    data[tg_id]['click_counter'] += 1
+    users_json = json.dumps(data, indent=1)
+    with open("users_data/statistiek.json", "w", encoding='utf-8') as my_file:
+        my_file.write(users_json)
+    my_file.close()
+
+
 def update(tg_id: int) -> dict:
     with open("users_data/service_data.json", "r", encoding='utf-8') as f:
         try:

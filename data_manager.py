@@ -78,3 +78,20 @@ def get_date(tg_id) -> list:
         except:
             f.close()
             return []
+
+
+def delete_record(tg_id, index):
+    with open("users_data/users_data.json", "r", encoding='utf-8') as f:
+        try:
+            data = json.loads(f.read())
+        except:
+            return None
+    f.close()
+    tg_id = str(tg_id)
+    data[tg_id]['rule'].pop(index)
+    data[tg_id]['date'].pop(index)
+    data[tg_id]['cost'].pop(index)
+    users_json = json.dumps(data, indent=3)
+    with open("users_data/users_data.json", "w", encoding='utf-8') as my_file:
+        my_file.write(users_json)
+    my_file.close()
